@@ -15,9 +15,17 @@ implementation{
     components SensorC as App;
     components new TimerMilliC() as Timer0;
 	components new TimerMilliC() as Timer1;
+	components new TimerMilliC() as TimerStart;
+	
+
     components ActiveMessageC;
-    components new AMSenderC(AM_SENSORDATAMSG);
-    components new AMReceiverC(AM_SENSORDATAMSG);
+    components new AMSenderC(AM_SENSORDATAMSG) as AMSender0;
+    components new AMReceiverC(AM_SENSORDATAMSG) as AMReceiver0;
+
+
+	components new AMSenderC(AM_BASESTATIONMSG) as AMSender1;
+	components new AMReceiverC(AM_BASESTATIONMSG) as AMReceiver1;
+
 
     //Sensor
     components new SensirionSht11C() as Sensor1;
@@ -27,12 +35,19 @@ implementation{
     App.Leds -> LedsC;
     App.Timer0 -> Timer0;
 	App.Timer1 -> Timer1;
-    App.Packet -> AMSenderC;
-    App.AMPacket -> AMSenderC;
-    App.AMControl -> ActiveMessageC;
-    App.AMSend -> AMSenderC;
-	App.AMSend1 -> AMSenderC;
-    App.Receive -> AMReceiverC;
+	App.TimerStart -> TimerStart;	
+	
+    App.Packet0 -> AMSender0;
+    App.AMPacket0 -> AMSender0;
+    App.AMControl-> ActiveMessageC;
+    App.AMSend0 -> AMSender0;
+    App.Receive0 -> AMReceiver0;
+	
+	App.Packet1 -> AMSender1;
+	App.AMPacket1 -> AMSender1;
+	App.AMSend1 -> AMSender1;
+	App.Receive1 -> AMReceiver1;
+
 
     //Sensor
     App.ReadTemp -> Sensor1.Temperature;

@@ -45,6 +45,8 @@
 
 #include "AM.h"
 #include "Serial.h"
+#include "RadioData.h"
+#include "printf.h"
 
 module BaseStationP @safe() {
   uses {
@@ -194,6 +196,8 @@ implementation
     call UartPacket.clear(msg);
     call UartAMPacket.setSource(msg, src);
 
+
+
     if (call UartSend.send[id](addr, uartQueue[uartOut], len) == SUCCESS)
       call Leds.led1Toggle();
     else
@@ -256,7 +260,7 @@ implementation
     am_id_t id;
     am_addr_t addr,source;
     message_t* msg;
-    
+    BaseStationMsg* temp;
     atomic
       if (radioIn == radioOut && !radioFull)
 	{
@@ -270,10 +274,21 @@ implementation
     source = call UartAMPacket.source(msg);
     id = call UartAMPacket.type(msg);
 
+
+
+
+
     call RadioPacket.clear(msg);
     call RadioAMPacket.setSource(msg, source);
-    
-    if (call RadioSend.send[id](addr, msg, len) == SUCCESS)
+  
+    temp = (BaseStationMsg*)(call RadioPacket.getPayload(msg,len));
+    printf("MM_Address is %u\n",addr);
+    printf("Source is %u\n",source);
+    printf("Type is %u\n",temp->typeCode);
+    printf("Frequenct is %u\n",temp->frequency);
+    printf("MM_StartTime is %u\n",temp->startTime);
+
+    if (call RadioSend.send[id](AM_BROADCAST_ADDR, msg, len) == SUCCESS)
       call Leds.led0Toggle();
     else
       {

@@ -22,7 +22,7 @@ typedef nx_struct SensorDataMsg{
 
 typedef nx_struct BaseStationMsg{
     nx_uint8_t typeCode; //0xb1
-    nx_uint8_t frequency;
+    nx_uint16_t frequency;
     nx_uint32_t startTime;
 }BaseStationMsg;
 

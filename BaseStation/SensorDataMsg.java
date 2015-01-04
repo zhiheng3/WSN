@@ -3,6 +3,7 @@
  * This class implements a Java interface to the 'SensorDataMsg'
  * message type.
  */
+import java.io.*;
 
 public class SensorDataMsg extends net.tinyos.message.Message {
 
@@ -18,7 +19,11 @@ public class SensorDataMsg extends net.tinyos.message.Message {
     public static int dataNumberNode1 = 0;
     public static int dataNumberNode2 = 0;
     public static int seqFirstNode1 = 0;
+    public static int seqLastNode1 = 0;
     public static int seqFirstNode2 = 0;
+    public static int seqLastNode2 = 0;
+    public static int count = 0;
+    public static String fileName = "result.txt";
 
 
     /** Create a new SensorDataMsg of size 15. */
@@ -93,36 +98,92 @@ public class SensorDataMsg extends net.tinyos.message.Message {
      */
     public String toString() {
       String s = "Message <SensorDataMsg> \n";
+      if(get_toId() == 1){
+        return (s+"Transform Data\n");
+      }
+
+      if(get_fromId() == 1 && !flagNode1){
+        reset(1);
+        flagNode1 = true;
+      }
+      else if(get_fromId() == 2 && !flagNode2){
+        reset(2);
+        flagNode2 = true;
+      }
+
+      FileWriter filewriter = null;
+      try{
+
+        if(get_fromId() == 1){
+            if(seqLastNode1 > get_seqNo()){
+                count++;
+                fileName = "result" + count +".txt";
+                filewriter = new FileWriter(fileName,true);
+            }
+            else{
+                filewriter = new FileWriter(fileName,true);
+            }
+        }
+         else{
+            if(seqLastNode2 > get_seqNo()){
+                fileName = "result" + count +".txt";
+                filewriter = new FileWriter(fileName,true);
+            }
+            else{
+                filewriter = new FileWriter(fileName,true);
+            }
+         }
+     }catch(IOException e){
+        System.out.println("Error occurs in open file!\n");
+     }
+     
+      String context = "";
       try {
         s += "  [typeCode=0x"+Long.toHexString(get_typeCode())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [fromId=0x"+Long.toHexString(get_fromId())+"]\n";
+        context += get_fromId() + " ";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [toId=0x"+Long.toHexString(get_toId())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [seqNo=0x"+Long.toHexString(get_seqNo())+"]\n";
+        context += get_seqNo() + " ";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [temperature="+convertTemp(get_temperature())+"]\n";
+        context += convertTemp(get_temperature()) + " ";
         //s += "  [temperature=0x"+Long.toHexString(get_temperature())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [humidity="+convertHumi(get_humidity())+"]\n";
+        context += convertHumi(get_humidity()) + " ";
         //s += "  [humidity=0x"+Long.toHexString(get_humidity())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [illuminance="+convertIllu(get_illuminance())+"]\n";
+        context += convertIllu(get_illuminance()) + " ";
         //s += "  [illuminance=0x"+Long.toHexString(get_illuminance())+"]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
-        s += "  [timeStamp="+get_timeStamp()+"]\n";
+        s += "  [timeStamp="+convertTime(get_timeStamp())+"]\n";
+        context += convertTime(get_timeStamp()) + "\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
       try {
         s += "  [lostRate="+showLostRate(get_fromId())+"%]\n";
       } catch (ArrayIndexOutOfBoundsException aioobe) { /* Skip field */ }
+
+      try{
+        filewriter.write(context,0,context.length());
+        filewriter.flush();
+      }catch(IOException e){
+        System.out.println("Error occurs in write file!\n");
+      }
+
+      updateLastSeq(get_fromId());
+
       return s;    }
 
 
@@ -131,44 +192,45 @@ public class SensorDataMsg extends net.tinyos.message.Message {
             return("none");
         }
         else if(nodeId == 1){
-            if(flagNode1 && (seqFirstNode1 >= get_seqNo())){
+            if(flagNode1 && (seqLastNode1 > get_seqNo())){
                 reset(1);
             }
-            if(!flagNode1){
-                seqFirstNode1 = get_seqNo();
-                flagNode1 = true;
-                dataNumberNode1 = 0;
-            }
+
             dataNumberNode1++;
             return (calaLostRate(get_seqNo(),seqFirstNode1,dataNumberNode1)+"");
         }
         else if(nodeId == 2){
-            if(flagNode2 && (seqFirstNode2 >= get_seqNo())){
+            if(flagNode2 && (seqFirstNode2 > get_seqNo())){
                 reset(2);
             }
-            if(!flagNode2){
-                seqFirstNode2 = get_seqNo();
-                flagNode2 = true;
-                dataNumberNode2 = 0;
-            }
+
             dataNumberNode2++;
             return (calaLostRate(get_seqNo(),seqFirstNode2,dataNumberNode2)+"");
         }
         else{
-            return("error");
+            return("error!");
         }
 
     }
 
+    public void updateLastSeq(int nodeId){
+        if(nodeId == 1){
+            seqLastNode1 = get_seqNo();
+        }
+        else if(nodeId == 2){
+           seqLastNode2 = get_seqNo();
+        }
+    }
+
     public void reset(int nodeId){
         if(nodeId == 1){
-            flagNode1 = false;
-            seqFirstNode1 = 0;
+            seqFirstNode1 = get_seqNo();
+            seqLastNode1 = get_seqNo();
             dataNumberNode1 = 0;
         }
         else if(nodeId == 2){
-            flagNode2 = false;
-            seqFirstNode2 = 0;
+            seqFirstNode2 = get_seqNo();
+            seqLastNode2 = get_seqNo();
             dataNumberNode2 = 0;
         }
     }
@@ -196,7 +258,10 @@ public class SensorDataMsg extends net.tinyos.message.Message {
     }
 
 
-
+    public long convertTime(long time){
+        long time_real = System.currentTimeMillis() / 1000000000 * 1000000000 + time;
+        return(time_real);
+    }
     // Message-type-specific access methods appear below.
 
     /////////////////////////////////////////////////////////

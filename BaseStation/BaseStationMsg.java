@@ -7,12 +7,12 @@
 public class BaseStationMsg extends net.tinyos.message.Message {
 
     /** The default size of this message type in bytes. */
-    public static final int DEFAULT_MESSAGE_SIZE = 6;
+    public static final int DEFAULT_MESSAGE_SIZE = 7;
 
     /** The Active Message type associated with this message. */
     public static final int AM_TYPE = 7;
 
-    /** Create a new BaseStationMsg of size 6. */
+    /** Create a new BaseStationMsg of size 7. */
     public BaseStationMsg() {
         super(DEFAULT_MESSAGE_SIZE);
         amTypeSet(AM_TYPE);
@@ -163,9 +163,9 @@ public class BaseStationMsg extends net.tinyos.message.Message {
 
     /////////////////////////////////////////////////////////
     // Accessor methods for field: frequency
-    //   Field type: short, unsigned
+    //   Field type: int, unsigned
     //   Offset (bits): 8
-    //   Size (bits): 8
+    //   Size (bits): 16
     /////////////////////////////////////////////////////////
 
     /**
@@ -197,37 +197,37 @@ public class BaseStationMsg extends net.tinyos.message.Message {
     }
 
     /**
-     * Return the value (as a short) of the field 'frequency'
+     * Return the value (as a int) of the field 'frequency'
      */
-    public short get_frequency() {
-        return (short)getUIntBEElement(offsetBits_frequency(), 8);
+    public int get_frequency() {
+        return (int)getUIntBEElement(offsetBits_frequency(), 16);
     }
 
     /**
      * Set the value of the field 'frequency'
      */
-    public void set_frequency(short value) {
-        setUIntBEElement(offsetBits_frequency(), 8, value);
+    public void set_frequency(int value) {
+        setUIntBEElement(offsetBits_frequency(), 16, value);
     }
 
     /**
      * Return the size, in bytes, of the field 'frequency'
      */
     public static int size_frequency() {
-        return (8 / 8);
+        return (16 / 8);
     }
 
     /**
      * Return the size, in bits, of the field 'frequency'
      */
     public static int sizeBits_frequency() {
-        return 8;
+        return 16;
     }
 
     /////////////////////////////////////////////////////////
     // Accessor methods for field: startTime
     //   Field type: long, unsigned
-    //   Offset (bits): 16
+    //   Offset (bits): 24
     //   Size (bits): 32
     /////////////////////////////////////////////////////////
 
@@ -249,14 +249,14 @@ public class BaseStationMsg extends net.tinyos.message.Message {
      * Return the offset (in bytes) of the field 'startTime'
      */
     public static int offset_startTime() {
-        return (16 / 8);
+        return (24 / 8);
     }
 
     /**
      * Return the offset (in bits) of the field 'startTime'
      */
     public static int offsetBits_startTime() {
-        return 16;
+        return 24;
     }
 
     /**
